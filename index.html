@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js </title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/white.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+		<!-- Load mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe"> </script>
+    
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    init_mathjax = function() {
+        if (window.MathJax) {
+        // MathJax loaded
+            MathJax.Hub.Config({
+                TeX: {
+                    equationNumbers: {
+                    autoNumber: "AMS",
+                    useLabelIds: true
+                    }
+                },
+                tex2jax: {
+                    inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                    displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+                    processEscapes: true,
+                    processEnvironments: true
+                },
+                displayAlign: 'center',
+                CommonHTML: {
+                    linebreaks: {
+                    automatic: true
+                    }
+                }
+            });
+
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        }
+    }
+    init_mathjax();
+    </script>
+    <!-- End of mathjax configuration -->
+
+
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css"/>
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <py-env> 
+    - numpy
+    </py-env>
+
+	</head>
+	<body>
+		<div class="reveal">
+		
+		
+		<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+			
+							
+				
+				
+<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left >
+							
+<h3>
+						Teorı́a de la realización como herramienta de
+determinación del cambio estructural</h3>
+
+				<p><normal> <a>Armando Rangel Galán </a> </normal></p>
+				<small><p>Asesores:</p> <p><a>Dr. Martı́n Puchet (FE, Tutor)</p>
+<p>Dr. Hector Benitez (IIMAS)</p>
+<p>Dr. Manuel Márquez (IIEC )</p>
+<p>Dr. Gustavo Carreón (IIEC) </a> </small></p>
+
+<p> <small>Marzo 2023</small></p>
+				</section>
+				
+				
+				
+		<!-- Example of nested vertical slides -->
+				<section>			
+<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left >
+					<h2>Avances</h2>
+					<small> <table>
+						<thead>
+							<tr>
+								<th>Tema</th>
+								<th>Resumen del avance</th>
+							</tr>
+						</thead>
+						
+						<tbody>
+						
+						<tr>
+								<td>Frontera de investigación</td>
+								<td>Se han delimitado los últimos temas que se cubrirán en la investigación. Aquellos no cubiertos pero relevantes también están determinados y serán enunciados como temas a profundizar. </td>
+								
+							</tr>
+						
+							<tr>
+								<td>Redacción</td>
+								<td>Se terminó de escribir el borrador del capítulo 1. Se escribió el modelo sobre inflación y sus resultados (capítulo 3) y se avanzo el capítulo 2, en las partes teóricas sobre la estructura de Hankel y el AF. </td>
+							</tr><tr>
+								<td>Código</td>
+								<td>Se avanzó en el tratamiento de los errores acumulados. Así mismo, se avanzaron los códigos para variaciones de la realización: preservando parte de la estructura de Hankel (promedios, Golub); cambiando el algoritmo de factorización (AFR, AFF, otros); modificando las dimensiones de la matriz de Hankel (ajustando series observadas y realizadas); incorporando nociones de sistemas variantes temporales.  </td>
+								
+							</tr>							
+<tr></tr>
+
+							
+						</tbody>
+					</table></small>
+				</section>
+				
+				
+				
+		
+		
+		
+		<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left >
+					<h2>Capítulo 1</h2>
+					
+					<div style="position: relative; width:100%">
+					<div style="width: 100%; background: #fff;height: 45px;position: absolute;">
+					</div>
+					<embed src="Capitulo1.pdf" type="application/pdf" width="100%" height="400px"/>
+					</div>
+					
+		</section>	
+		
+					
+										
+						<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left data-auto-animate>
+						
+					<h2 data-id="code-title">Código de la Realización AFF</h2>
+					<pre data-id="code-animation"><code class="hljs javascript" data-trim data-line-numbers="|4,8-11|17|22-24"><script type="text/template">
+						
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Armando Rangel Galán
+"""
+import numpy as np
+import scipy.linalg as spl
+import realpar as rp
+import matplotlib.pyplot as plt
+import matplotlib.pylab as pl
+import pandas as pd
+import itertools as it
+
+# =======================================================================================
+# CARGAR DESCRIPCIÓN EXTERNA, GRAFICARLA Y OBTENER H
+# =======================================================================================
+io_b=pd.read_excel("io.xlsx")
+Cve=io_b[io_b.columns[1]]+io_b[io_b.columns[2]]+io_b[io_b.columns[4]]
+Mc=(io_b[io_b.columns[5]]+io_b[io_b.columns[6]])*io_b[io_b.columns[9]]
+X=io_b[io_b.columns[8]]*io_b[io_b.columns[9]]
+Yf=Cve+X+io_b[io_b.columns[3]]
+M=Mc+(io_b[io_b.columns[7]]*io_b[io_b.columns[9]])
+ipo=pd.DataFrame({'a11':Cve/Yf,'a12':X/M,'a21':Mc/Yf,'a22':0})
+ip=ipo.drop(range(100,104,1),axis=0)
+
+ct=[]
+s_io=[]
+A=np.zeros((2,2))
+I=np.identity(2)
+sio_f=np.empty((0,4))
+
+for i in range(len(ip)):
+    for j, k in it.product(range(2),range(2)):
+        A[j,k]=ip[ip.columns[j*2+k]][i]
+    ct.append(np.matrix(A))
+    s_io.append(np.linalg.inv(np.matrix(I)-np.matrix(A)))
+    sio_f=np.append(sio_f,np.linalg.inv(np.matrix(I)-np.matrix(A)).flatten(),axis=0) 
+
+Bio=pd.DataFrame(np.array(sio_f),columns=("a11","a12","a21","a22"))
+pl.figure(figsize=(14, 4), dpi=100) 
+plt.plot(Bio)
+plt.title("Series de tiempo de las entradas en las matrices observadas, 1993-2017")
+pl.xticks(np.arange(1,102,3))
+pl.yticks(np.arange(0,8,.5))
+plt.xlim(0,101)
+plt.ylim(0,8.5)
+plt.xlabel("TRIMESTRE")
+plt.grid()
+plt.ylabel("VALOR DE LA COORDENADA")
+plt.legend(("a11","a12","a21","a22"),loc="upper right")
+
+def hip_rang(des_ext):
+ rangos=[]
+ ran_ant=[]
+ mhs=[]
+ for i in range(1,len(des_ext)+1):
+     H=rp.matriz_hankel(des_ext,i,len(des_ext)+1-i)
+     inf=[i,len(des_ext)+1-i,np.linalg.matrix_rank(H)]
+     rangos.append(inf)
+     mhs.append(H)
+     if i<len(des_ext):
+         H_ant=rp.matriz_hankel(des_ext,i,len(des_ext)-i)
+         inf_ant=[i,len(des_ext)-i,np.linalg.matrix_rank(H_ant)]
+         ran_ant.append(inf_ant)
+ return(mhs[int(len(des_ext)/2)],rangos,ran_ant)
+
+mhs=hip_rang(s_io)
+
+# =======================================================================================
+# DESCOMPOSICIÓN ESPECTRAL DE LA MATRIZ DE HANKEL Y GRAFICACIÓN DE SUS VALORES SINGULARES
+# =======================================================================================
+def desc_esp_mh(MHank):
+ usv=np.linalg.svd(MHank)
+ s=spl.diagsvd(usv[1],usv[0].shape[1],usv[2].shape[0])
+ U=usv[0]
+ V=usv[2]
+ S=np.matrix(s)
+ vs_n=usv[1]/sum(usv[1])
+ return(usv,V,S,U,usv[1],vs_n)
+
+dvs=desc_esp_mh(mhs[0])
+
+svs=0
+for i in range(len(dvs[5])):
+    if svs<.9: svs=dvs[5][i]+svs
+    else: break
+pos=i
+
+qui_vs=0
+pl.figure(figsize=(14, 4), dpi=100)  
+plt.plot(np.arange(len(s_io)-qui_vs)+qui_vs+ 1,dvs[5][qui_vs:100],"o", color="c")
+plt.plot(pos,dvs[5][pos],"o", color="r")
+plt.xlabel("POSICIÓN DEL VALOR SINGULAR")
+plt.ylabel("PORCENTAJE")
+pl.xlim(0,101)
+plt.grid()
+pl.xticks(np.arange(0,104,4))
+pl.yticks(np.arange(0,1.2,.1))
+plt.savefig("sin%ivs.png"%qui_vs,bbox_inches='tight', dpi=900)
+
+# =======================================================================================
+# GENERACIÓN DE LAS MH REDUCIDAS, REALIZACIÓN Y MATRICES ESTIMADAS
+# =======================================================================================
+def mh_red_est(V,S,U,des_ext):
+ mt_est=[]
+ MH_red=[]
+ rp_red=[]
+ dim=np.shape(des_ext[0])
+ for i in range(1,int(V.shape[0]/dim[0])):    
+     V_i=V[0:dim[0]*i,0:]
+     S_i=S[0:dim[0]*i,0:dim[0]*i]
+     U_i=U[0:,0:dim[0]*i]
+     H_red=U_i*S_i*V_i                                                  
+     MH_red.append(H_red)    
+     F_r,G_r,H_r=rp.real_par(H_red,dim[0],dim[1]) #Realización MH reducida                                    
+     real_red=[F_r,G_r,H_r]
+     rp_red.append(real_red)
+     for j in range(len(des_ext)):
+         l_est_i=H_r*(F_r**j)*G_r                                       
+         mt_est.append(l_est_i)
+ return(MH_red,mt_est,rp_red)
+ 
+MH_red=mh_red_est(dvs[1],dvs[2],dvs[3],s_io)
+
+
+# =======================================================================================
+#  DETERMINACIÓN DE LA MEJOR APROXIMACIÓN DE LAS DESCRIPCIONES EXTERNAS ESTIMADAS
+# =======================================================================================
+
+def prox_de_di(mat_red,des_ext):
+ distancias=[]
+ distancia=[]
+ for j in range(int(len(mat_red)/len(des_ext))):
+     prom_F=0
+     for i in range(len(des_ext)):
+         prom_F=prom_F+np.linalg.norm(mat_red[i+len(des_ext)*j]-des_ext[i])
+     distancias.append([round(prom_F*(1/len(des_ext)),2),j+1])
+     distancia.append(round(prom_F*(1/len(des_ext)),2))
+ p_min=distancia.index(min(distancia))
+ MEJOR_EST=mat_red[p_min*len(des_ext):(p_min+1)*len(des_ext)]
+ return(distancias,p_min,MEJOR_EST,distancia)
+ 
+distancias=prox_de_di(MH_red[1],s_io)
+
+# =======================================================================================
+# GRÁFICA DE LAS DISTANCIAS PROMEDIO ENTRE LA DESCRIPCIÓN EXTERNA REAL Y 
+# LAS ESTIMADAS
+# =======================================================================================
+
+def graf_dist_prom(distancias):
+ pr_ord=sorted(distancias[0])
+ aprox=np.array(pr_ord)
+ val_ap=np.array(pr_ord)
+ c=28
+ ind=val_ap[c:len(aprox),0]>325
+ val_ap[c:len(aprox),0][ind]=350
+ width =.95
+ col_r=7
+ pl.figure(figsize=(25, 8), dpi=100) 
+ plt.subplot(211)
+ bars = pl.bar(np.array(aprox[0:c,1]), np.array(aprox[0:c,0]),width=width)
+ for r,bar in zip(np.array(aprox[0:c,0]), bars):
+     bar.set_facecolor(pl.cm.jet(r/col_r))
+     bar.set_alpha(.9)
+ pl.xticks(np.arange(1,51))
+ pl.yticks(np.arange(0,max(np.array(aprox[0:c,0]))+1,0.5))
+ plt.ylabel("DISTANCIA PROMEDIO")
+ pl.xlim(0.3,49.5)
+ pl.ylim(0,max(np.array(aprox[0:c,0]))+1)
+ for label, x, y in zip(np.trunc(aprox[0:c,0]*10)/10,aprox[0:c,1]-0.2,aprox[0:c,0]+.2):
+     plt.annotate(label, xy=(x,y))    
+
+ plt.subplot(212)
+ bars = pl.bar(np.array(val_ap[c:49,1]), np.array(val_ap[c:49,0]),width=width)
+ for r,bar in zip(np.array(val_ap[c:49,0]), bars):
+     bar.set_facecolor(pl.cm.jet(r/col_r))
+     bar.set_alpha(.9)
+ pl.xticks(np.arange(1,51))
+ pl.yticks(np.arange(0,325,25))
+ plt.xlabel("PARES DE VALORES SINGULARES MÁS GRANDES")
+ plt.ylabel("DISTANCIA PROMEDIO")
+ pl.xlim(0.3,49.5)
+ pl.ylim(0,420)
+ for label, x, y in zip(aprox[c:len(aprox),0],val_ap[c:len(aprox),1]-0.5,val_ap[c:len(aprox),0]+20):
+     if label>325:
+         if label==max(aprox[c:len(aprox),0]):
+             plt.annotate(format(label,'.0e'), xy=(x,y+2))
+         else:
+             plt.annotate(format(label,'.0e'), xy=(x,y))
+     else:
+         plt.annotate(label, xy=(x,y))
+ plt.savefig("d_vpe_vpo.png",  bbox_inches='tight', dpi=200)
+ return()
+ 
+graf_dist_prom(distancias)
+
+# =======================================================================================
+#  REPRESENTACIÓN GRÁFICA DE LA PROXIMIDAD DE LAS DESCRIPCIONES EXTERNAS ESTIMADAS Y REAL
+# =======================================================================================
+
+def graf_prox(Base_obs,realizaciones,des_ext,distancias):
+ a=int(input("Indica el orden de cercanía de la realización a los datos observados para visualizarla (1-49)\n"))-1
+ ord_dts=pd.DataFrame(sorted(distancias))
+ num_reali=ord_dts[1][a]
+ reali=realizaciones[num_reali]
+ estim=np.empty((0,4))
+ for j in range(len(des_ext)):
+         estim=np.append(estim,(reali[2]*(reali[0]**j)*reali[1]).flatten(),0)        
+ estimacion=pd.DataFrame(np.array(estim),columns=("a11","a12","a21","a22"))
+ pl.figure(figsize=(14, 8), dpi=100) 
+ plt.subplot(211)
+ plt.plot(estimacion)
+ plt.title("Series de tiempo de las entradas de las matrices estimadas (arriba) y observadas (abajo), 1993-20171")
+ pl.xticks(np.arange(1,102,3))
+ pl.yticks(np.arange(0,8,.5))
+ plt.xlim(0,101)
+ plt.ylim(0,8.5)
+ plt.grid()
+ plt.ylabel("VALOR DE LA COORDENADA")
+ plt.legend(("a11","a12","a21","a22"),loc="upper right")
+ plt.subplot(212)
+ plt.plot(Base_obs)
+ pl.xticks(np.arange(1,102,3))
+ pl.yticks(np.arange(0,8,.5))
+ plt.xlim(0,101)
+ plt.ylim(0,8.5)
+ plt.xlabel("TRIMESTRE")
+ plt.grid()
+ plt.ylabel("VALOR DE LA COORDENADA")
+ plt.savefig("best_aprox_%i.png"%(a+1),bbox_inches='tight',dpi=200)
+ return()
+ 
+graf_dide=graf_prox(Bio,MH_red[2],s_io,distancias[0])
+
+					</script></code></pre>
+				</section>
+					
+				</section>
+
+				
+		
+		
+		
+		<section>
+<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left id="fragments">
+
+						<h3>Breve explicación sobre la TR</h3><p> </p>
+						<p class="fragment">Partiendo de un sistema...</p>
+						<p class="fragment"><img src="sistema.png"></p>
+						<p class="fragment">el cual podamos asumir que es...</p>
+					
+						<ul class="fragment">
+						<li><h6>Discreto</h6></li>
+						<li><h5>Invariante temporal</h5></li>
+						<li><h5>Finito</h5></li>
+						<li><h5>Lineal</h5></li>
+					        </ul>
+								
+						
+						<aside class="notes">
+							This slide has fragments which are also stepped through in the notes window.
+						</aside>
+					
+					</section>
+				
+						
+	<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left id="fragments" >
+	
+						<p class="fragment">Entonces, al expresarlo como...</p>
+						<p class="fragment">\[\tiny
+						\begin{pmatrix}
+						y_{1}(t)\\
+						\vdots\\
+						y_{n}^{(t)}
+						\end{pmatrix}=\begin{pmatrix}
+						a_{11}^{(t)}&\dots&a_{1m}^{(t)}\\
+						\vdots&\ddots&\vdots\\
+						a_{n1}^{(t)}&\dots& a_{nm}^{(t)}\\
+						\end{pmatrix}\begin{pmatrix}
+						x_{1}(t)\\
+						\vdots\\
+						x_{m}^{(t)}
+						\end{pmatrix}
+						\]</p>
+						
+						<p class="fragment">podemos generar una sucesión con la matriz de cada uno de los periodos disponibles (digamos $k$)...</p>
+						
+						<p class="fragment">\[\tiny\begin{pmatrix}
+						a_{11}^{(1)}&\dots&a_{1m}^{(1)}\\
+						\vdots&\ddots&\vdots\\
+						a_{n1}^{(1)}&\dots& a_{nm}^{(1)}\\
+						\end{pmatrix}; \begin{pmatrix}
+						a_{11}^{(2)}&\dots&a_{1m}^{(2)}\\
+						\vdots&\ddots&\vdots\\
+						a_{n1}^{(2)}&\dots& a_{nm}^{(2)}\\
+						\end{pmatrix}; \begin{pmatrix}
+						a_{11}^{(3)}&\dots&a_{1m}^{(3)}\\
+						\vdots&\ddots&\vdots\\
+						a_{n1}^{(3)}&\dots& a_{nm}^{(3)}\\
+						\end{pmatrix} ;\dots; \begin{pmatrix}
+						a_{11}^{(k)}&\dots&a_{1m}^{(k)}\\
+						\vdots&\ddots&\vdots\\
+						a_{n1}^{(k)}&\dots& a_{nm}^{(k)}\\
+						\end{pmatrix}\]
+	
+	<p class="fragment"> la denominada DESCRIPCIÓN EXTERNA (DE) del sistema </p>
+	
+					</section>
+
+<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left id="fragments">				
+					<p class="fragment">Dicha DE podemos pensarla como "fotografías" que resumen todos los procesos internos del sistema en cada tiempo.</p>
+					
+					<p class="fragment">En el caso de sistemas para los que sabemos como se comportan internamente, es decir, que están identificados, esta sucesión se puede convertir en información para cotejar.</p>
+					
+					 <p class="fragment">Sin embargo, en lo que atañe a los sistemas económicos, nos es imposible observar dichos procesos: el sistema es una CAJA NEGRA.</p>
+					
+					
+					</section>
+		
+					
+<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left id="fragments">						
+					
+										<p class="fragment"> Si se desea abrir la CAJA NEGRA, se está frente al problema de IDENTIFICACIÓN DEL SISTEMA SUBYACENTE. </p>
+					<p class="fragment">		La Teoría de la Realización busca realizar dicha identificación. </p>			
+										<p class="fragment"> Esto lo consigue construyendo tres matrices $\LARGE F, G, H$ tiempo-invariantes tales que   </p>
+					
+					<p class="fragment"> $\LARGE HF^{t-1}G\approx L_t(r^*)\approx L_t$	</p>			
+					
+					
+					
+									
+					
+								
+					</section>
+		
+		
+		<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left id="fragments">				
+				<p class="fragment"> Dicha construcción procede bajo los siguientes pasos...   </p>
+				<div style="position: relative; width:100%" class="fragment">
+					<div style="width: 100%; background: #fff;height: 45px;position: absolute;">
+					</div>
+					<embed src="realizacion.pdf" type="application/pdf" width="100%" height="500px"/>
+					</div>	
+					
+			</section>		
+				</section>
+	
+	<section>
+	
+<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left>
+
+<h3>Sistema identificable: implicaciones de la TR</h3>
+
+<img src="Muelle.gif">
+<img src="resorte.gif">
+
+<small>El sistema son los elementos, su estructura y el estado de sus interacciones. El input es una fuerza que estira el resorte y es exógena al sistema. El output es la distancia alcanzada desde el equilibrio, y se puede considerar como parte del sistema. </small>
+
+<small> Las interacciones del sistema después de aplicar el input se pueden resumir en:  </small> $m\ddot{y}=u-k_1\dot{y}-k_2y$
+
+
+
+			</section>	
+				
+<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left>
+
+<small>Las variables de estado son observaciones sobre algunas partes del sistema, las cuales permiten conocer todas demás.  Si para el muelle tomamos </small> $\small x_1=y$,  $\small x_2=\dot{y}$, <small>estas serían las variables de estado del ejemplo. </small>
+<img src="Muelle.gif">
+<img src="resorte.gif">
+
+<small>A partir de ellas es posible construir la realización,</small>
+
+
+
+
+ $\begin{eqnarray*}\small\begin{pmatrix}
+  \dot{x}_1(t)\\
+  \dot{x}_2(t)
+ \end{pmatrix}&=&\begin{pmatrix}
+  0&1\\
+  -k_2/m&-k_1/m
+ \end{pmatrix}\begin{pmatrix}
+  x_1(t)\\
+  x_2(t)
+ \end{pmatrix}+\begin{pmatrix}
+  0\\
+  1/m
+ \end{pmatrix}\\
+y(t)&=&\small\begin{pmatrix}
+  1&0
+ \end{pmatrix}\small\begin{pmatrix}
+  x_1(t)\\
+  x_2(t)
+ \end{pmatrix}\end{eqnarray*}
+$
+
+
+			</section>				
+				
+		</section>
+		
+<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left>
+		<h3>Siguientes pasos</h3>
+		<ul>
+						<li>Terminar de ajustar el código de la TR invariante aplicado al modelo de incidencias de la inflación</li>
+						<li>Aislar el efecto acumulativo del error en procesos iterativos </li>
+						<li>Aplicar la TR a todas las matrices reducidas de Hankel, y determinar si ayuda a la precisión </li>
+						<li>Determinar las ventajas y desventajas del AFF, y discutir las maneras de formar una factorización a la Casti, pero más eficiente</li>
+						<li>Identificar el modelo de incidencias sin errores de proximidad y evaluar los límites de la TR </li>
+					</ul>
+</section>		
+
+
+<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left>
+
+<h3>Crecimiento del error SVD</h3>
+
+<py-script>
+import numpy as np
+X=np.matrix([[1,0],[1,1]])
+usv=np.linalg.svd(X)
+S=np.matrix(np.diag(usv[1]))
+
+print(X)
+print(np.round(usv[0]*S*usv[2],0))
+
+print(np.round(X**10,0))
+print(np.round(usv[0]*(S**10)*usv[2],0))
+
+print(X**15)
+print(np.round(usv[0]*(S**15)*usv[2],0))
+
+print(X**20)
+print(np.round(usv[0]*(S**20)*usv[2],0))
+
+print(X**25)
+print(np.round(usv[0]*(S**25)*usv[2],0))
+
+</py-script>
+	
+</section>	
+			</div>
+			
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
