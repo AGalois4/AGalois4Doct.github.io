@@ -49,12 +49,7 @@
     <!-- End of mathjax configuration -->
 
 
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css"/>
-    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
-    <py-env> 
-    - numpy
-    </py-env>
+    
 
 	</head>
 	<body>
@@ -554,34 +549,7 @@ $
 </section>		
 
 
-<section data-background="unam.png" data-background-size=50% data-background-opacity=.1 data-background-position=left>
-
-<h3>Crecimiento del error SVD</h3>
-
-<py-script>
-import numpy as np
-X=np.matrix([[1,0],[1,1]])
-usv=np.linalg.svd(X)
-S=np.matrix(np.diag(usv[1]))
-
-print(X)
-print(np.round(usv[0]*S*usv[2],0))
-
-print(np.round(X**10,0))
-print(np.round(usv[0]*(S**10)*usv[2],0))
-
-print(X**15)
-print(np.round(usv[0]*(S**15)*usv[2],0))
-
-print(X**20)
-print(np.round(usv[0]*(S**20)*usv[2],0))
-
-print(X**25)
-print(np.round(usv[0]*(S**25)*usv[2],0))
-
-</py-script>
 	
-</section>	
 			</div>
 			
 		</div>
